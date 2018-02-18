@@ -1,0 +1,10 @@
+<div class="dropdown dropdown-container">
+  <button type="button" class="btn btn-primary dropdown-toggle pull-right" data-toggle="dropdown" role="button">
+  Users <span class="caret"></span>
+  </button>
+  <ul id="users-dropdown" class="dropdown-menu" role="menu" *ngIf="users && users.length != 0 ">
+    <li class="dropdown-item text-center" *ngFor="let user of users">
+      {{ user }} <div role="separator" class="divider"></div>
+    </li>
+  </ul>
+</div>

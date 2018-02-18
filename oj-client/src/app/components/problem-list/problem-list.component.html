@@ -1,0 +1,27 @@
+<div class="container">
+  <app-new-problem></app-new-problem>
+  <div class='nav navbar'>
+    <form class='navbar-form navbar-left'>
+      <div class='form-inline form-group has-feedback'>
+        <input name='problemsSearchBox' id='problems-search-box' type='text' class='form-control' placeholder='Search problem title, description or IDs' [(ngModel)]='queryParam'>
+        <i class='glyphicon glyphicon-search form-control-feedback'></i>
+      </div>
+    </form>
+  </div>
+  <div class="list-group">
+    <div class="list-group-item row"> 
+      <strong class="col-md-1">Difficulty</strong>
+      <strong class="col-md-1">ID</strong>
+      <strong class="col-md-10">Name</strong>
+    </div>
+    <div class="list-group-item row" *ngFor="let problem of (problems | searchProblems: queryParam)">
+      <span class="badge pull-left col-md-1 diff-{{problem.difficulty}}">
+        {{ problem.difficulty }}
+      </span>
+      <strong class="title col-md-1">{{ problem.id }}.</strong>
+      <a class="col-md-10" [routerLink]="['/problems', problem.id]">
+        <strong>{{ problem.name }}</strong>
+      </a>
+    </div>
+  </div>
+
