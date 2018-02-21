@@ -1,10 +1,14 @@
 webpackJsonp(["polyfills"],{
 
 /***/ "../../../../../src/polyfills.ts":
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_core_js_es7_reflect__ = __webpack_require__("../../../../core-js/es7/reflect.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_core_js_es7_reflect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_core_js_es7_reflect__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_zone_js_dist_zone__ = __webpack_require__("../../../../zone.js/dist/zone.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_zone_js_dist_zone___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_zone_js_dist_zone__);
 /**
  * This file includes polyfills needed by Angular and is loaded before the app.
  * You can add your own extra polyfills to this file.
@@ -20,7 +24,6 @@ webpackJsonp(["polyfills"],{
  *
  * Learn more in https://angular.io/docs/ts/latest/guide/browser-support.html
  */
-Object.defineProperty(exports, "__esModule", { value: true });
 /***************************************************************************************************
  * BROWSER POLYFILLS
  */
@@ -45,7 +48,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // import 'core-js/es6/reflect';
 /** Evergreen browsers require these. **/
 // Used for reflect-metadata in JIT. If you use AOT (and only Angular decorators), you can remove.
-__webpack_require__("../../../../core-js/es7/reflect.js");
+
 /**
  * Required to support Web Animations `@angular/platform-browser/animations`.
  * Needed for: All but Chrome, Firefox and Opera. http://caniuse.com/#feat=web-animation
@@ -54,7 +57,7 @@ __webpack_require__("../../../../core-js/es7/reflect.js");
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */
-__webpack_require__("../../../../zone.js/dist/zone.js"); // Included with Angular CLI.
+ // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */

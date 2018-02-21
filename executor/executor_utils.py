@@ -13,6 +13,7 @@ IMAGE_NAME = 'yitongw2/coj'
 client = docker.from_env()
 
 TEMP_BUILD_DIR = "%s/tmp/" % CURRENT_DIR
+print ('TEMP_BUILD_DIR', TEMP_BUILD_DIR)
 CONTAINER_NAME = "%s:latest" % IMAGE_NAME
 
 SOURCE_FILE_NAMES = {
@@ -46,6 +47,7 @@ def load_image():
 
 def make_dir(dir):
     try:
+        print (dir)
         os.mkdir(dir)
     except OSError:
         print("cannot create dir")
