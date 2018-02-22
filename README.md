@@ -1,13 +1,13 @@
 # COJ - (Collaborative Online Judge)
-Collaborative online judge system is a formun-like web application that allows mutiple users to add coding problems and collaborate on one coding problems simutanesouly just like a Google Doc. Unlike Google Doc, collaborative online judge system comes with an executor server which will executes the code submitted by users.
+Collaborative online judge system is a forum-like web application that allows multiple users to add coding problems and collaborate on one coding problems simultaneously just like a Google Doc. Unlike Google Doc, collaborative online judge system comes with an executor server which will execute the code submitted by users.
 
 Three major components:
 
 - oj-client : Angular2-based front end with bootstrap
 - oj-server : node.js backend platform with express middleware
-- executor : Flask server with Docker Engine API
+- executor: Flask server with Docker Engine API
 
-COJ also provides [RESTful APIs](https://github.com/yitongw2/COJ/blob/master/README.md#restful-api-documentaion) for obtaining, fetching and searching coding problems as well as executing user-submitted code. 
+COJ also provides [RESTful APIs](https://github.com/yitongw2/COJ/blob/master/README.md#restful-api-documentation) for obtaining, fetching and searching coding problems as well as executing user-submitted code. 
 
 Tech Stack = {Angular2, Node.js, Express, MongoDB, Redis, Javascript, Python, Nginx, Socket.io}
 
@@ -28,7 +28,7 @@ git clone git@github.com:yitongw2/COJ.git
 
 ### Prerequisites
 
-Things you need to install the software and how to install them are listed below. However, theses instructions are only for **Linux Ubuntu 16.04**.
+Things you need to install the software and how to install them are listed below. However, these instructions are only for **Linux Ubuntu 16.04**.
 
 **Install Node.js**
 ```
@@ -156,7 +156,7 @@ upstream backend {
    ...
 }
 ```
-The list of servers are the backend servers that nginx will redistribute client requests to. 
+The list of servers is the backend servers that nginx will redistribute client requests to. 
 ### Installing
 Running the application on a local machine is simple. There is bash script named init.sh in the root folder which will initialize whatever the project needs. 
 
@@ -180,7 +180,7 @@ ng build
 ```
 This will build the whole front end into a folder named public at root level
 
-if you are developing new features in front end and want to monitor real-time changes, use watch option
+if you are developing new features in the front end and want to monitor real-time changes, use watch option
 ```
 ng build --watch
 ```
@@ -189,7 +189,7 @@ ng build --watch
 
 *Fire up oj-server*
 
-first go to oj-server directory
+first, go to oj-server directory
 ```
 cd oj-server
 ```
@@ -206,7 +206,7 @@ nodemon server.js
 
 *Fire up executor*
 
-first go to exxcutor directory
+first, go to executor directory
 ```
 cd executor
 ```
@@ -218,7 +218,7 @@ run flask app
 ```
 python3 executor_server.py
 ```
-## RESTful API documentaion
+## RESTful API documentation
 
 ---
 ### /problems
@@ -362,7 +362,31 @@ example for request */search?difficulty=easy*
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+The whole system can be deployed in various ways depending how much resources you have. Some examples are provided below.
+
+Notice that MongoDB is separated into a different server on MLab because we are using the free Database-as-a-Service for MongoDB provided by MLab.
+
+#### All-in-One
+
+![alt-img](https://user-images.githubusercontent.com/13974845/36519479-a22f7022-1740-11e8-9c18-37eb50d6674f.png)
+
+The simplest way is just to run different components on the same machine. OJ-client doesn't need to be running (pre-built before running). OJ-server is running on port 3000 while executor is running on port 5000. Above them all, Nginx acts as a proxy server that directs requests (-> port 80) to (-> port 3000) where the oj-server is running.
+
+#### Load Balancer - OJ-Server
+
+![vauvwzu9ijiu 1](https://user-images.githubusercontent.com/13974845/36520184-69da5864-1744-11e8-8440-8a08af8a3e29.png)
+
+This type of deployment is most helpful when your application is having a lot of users simultaneously. In other words, a lot of requests per second or per day. 
+
+However, This will require an additional implementation of **[master-slave redis databases](https://redis.io/topics/replication)** since Redis is used to store buffers of user code in case a user leave accidentally.
+
+#### Load Balancer - Executor
+
+![vauvwzu9ijiu 2](https://user-images.githubusercontent.com/13974845/36520494-1c614d66-1746-11e8-9088-a2118b1a28a0.png)
+
+This type of deployment is most helpful when users are submitting and executing code very frequently since the workload of the executor is now being distributed among multiple machines.
+
+To set up Nginx in order to work like that, simply add another server configuration targeting port 5000 for Nginx.
 
 ## Built With
 
@@ -392,3 +416,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * Adapted from CS503 project of Bittiger.com 
+
+## Additional
+This markdown file is created using dillinger.io, which is a great online markdown editor tool.
