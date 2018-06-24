@@ -1,27 +1,35 @@
-<div class="container">
-  <app-new-problem></app-new-problem>
-  <div class='nav navbar'>
-    <form class='navbar-form navbar-left'>
-      <div class='form-inline form-group has-feedback'>
-        <input name='problemsSearchBox' id='problems-search-box' type='text' class='form-control' placeholder='Search problem title, description or IDs' [(ngModel)]='queryParam'>
-        <i class='glyphicon glyphicon-search form-control-feedback'></i>
-      </div>
-    </form>
-  </div>
-  <div class="list-group">
-    <div class="list-group-item row"> 
-      <strong class="col-md-1">Difficulty</strong>
-      <strong class="col-md-1">ID</strong>
-      <strong class="col-md-10">Name</strong>
-    </div>
-    <div class="list-group-item row" *ngFor="let problem of (problems | searchProblems: queryParam)">
-      <span class="badge pull-left col-md-1 diff-{{problem.difficulty}}">
-        {{ problem.difficulty }}
-      </span>
-      <strong class="title col-md-1">{{ problem.id }}.</strong>
-      <a class="col-md-10" [routerLink]="['/problems', problem.id]">
-        <strong>{{ problem.name }}</strong>
-      </a>
-    </div>
-  </div>
+<head>
+  <!-- since bootstrap4 stops supporting any icons and angular is also not friendly to gly or font awesome, I have to use the cdn-->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+</head>
 
+<div class="container problems_container">
+  <div class="list-group">
+    <div class="list-group-item">
+      <div class="row">
+        <strong class="col-md-2">Difficulty</strong>
+        <strong class="col-md-2">ID</strong>
+        <strong class="col-md-7">Name</strong>
+        <a href="#" class="col-md-1" data-toggle="modal" data-target="#newProblem"><i class="fas fa-plus-square add-icon"></i></a>
+      </div>
+    </div>
+    <a class="list-group-item" *ngFor="let problem of (problems | searchProblems: searchTerm)" [routerLink]="['/problems', problem.id]">
+      <div class="row">
+        <span class="{{'col-md-2 pull-left badge difficulty diff-' + problem.difficulty.toLowerCase()}}">
+          {{problem.difficulty}}
+        </span>
+        <strong class="col-md-2">{{problem.id}}.</strong>
+        <strong class="col-md-8 title">{{problem.name}}</strong>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- newProblem modal -->
+<div class="modal fade" id="newProblem" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <app-new-problem></app-new-problem>
+    </div>
+  </div>
+</div>

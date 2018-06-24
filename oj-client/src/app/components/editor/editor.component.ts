@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CollaborationService } from '../../services/collaboration.service';
-import { ActivatedRoute, Params } from '@angular/router';
-import { DataService } from '../../services/data.service';
+import { ExecutorService } from '../../services/executor.service';
+import { ActivatedRoute } from '@angular/router';
 
 declare var ace: any;
 
@@ -11,16 +11,11 @@ declare var ace: any;
   styleUrls: ['./editor.component.css']
 })
 export class EditorComponent implements OnInit {
+
+  editor: any;
+  sessionId: string;
   languages: string[]  = ['Java', 'Python'];
   language: string = 'Java';
-  sessionId: string;
-  editor: any;  
-  output: string = '';
-
-  constructor(private collaboration: CollaborationService,
-              private dataService: DataService,
-              private route: ActivatedRoute) { }
-
   defaultContent = {
     'Java': `public class Example {
       public static void main(String[] args) {
@@ -33,63 +28,50 @@ export class EditorComponent implements OnInit {
     `
   };
 
-  ngOnInit() {
-    // use problem id as session id
-    this.route.params
-      .subscribe(params => {
-        this.sessionId = params['id'];
-        this.initEditor();
-      });
-    }
+  constructor(private collaboration: CollaborationService,
+              private executor: ExecutorService,
+              private route: ActivatedRoute) {
+  }
 
-  initEditor(): void {
+  ngOnInit() {
     this.editor = ace.edit("editor");
     this.editor.setTheme("ace/theme/eclipse");
-    this.resetEditor(); 
-
-    // setup collaboration socket
-    this.collaboration.init(this.editor, this.sessionId);
-    this.editor.lastAppliedChange = null;
-    
-    // registrer change callback
-    this.editor.on("change", (e) => {
-      console.log('editor changes: ' + JSON.stringify(e));
-      if (this.editor.lastAppliedChange != e) {
-        this.collaboration.change(JSON.stringify(e));
-      }
-    })
- 
-  }
-
-  // reset editor content
-  resetEditor(): void {
-    this.editor.setValue(this.defaultContent[this.language]);
-    this.editor.getSession().setMode("ace/mode/" + this.language.toLowerCase());
-  }
-
-  // set language
-  setLanguage(language: string): void {
-    this.language = language;
-
     this.resetEditor();
+    // initialize collaboration service
+    console.log(this.route.params);
+    this.route.params.subscribe(params => {
+      this.sessionId = params['id'];
+      this.collaboration.init(this, this.sessionId);
+      this.collaboration.restoreBuffer();
+    });
+
+    this.editor.lastAppliedChange = null;
+    this.editor.on('change', diff => {
+      console.log('editor changes: ' + JSON.stringify(diff));
+      if (this.editor.lastAppliedChange != diff) {
+        this.collaboration.change(JSON.stringify(diff));
+      }
+    });
   }
 
-  // submit
-  submit(): void {
-    let user_code = this.editor.getValue();
-    console.log(user_code);
-        
-    const data = {
-      user_code: user_code,
-      lang: this.language.toLocaleLowerCase()
+  setLanguage(language: string) {
+    this.language = language;
+    this.resetEditor();
+    this.collaboration.changLang(this.language);
+  }
+
+  resetEditor() {
+    this.editor.getSession().setMode('ace/mode/' + this.language.toLowerCase());
+    this.editor.setValue(this.defaultContent[this.language]);
+  }
+
+  submit() {
+    let data = {
+      'sessionId': this.sessionId,
+      'code': this.editor.getValue(),
+      'lang': this.language.toLowerCase()
     };
 
-    this.dataService.buildAndRun(data)
-      .then(res => {
-        this.output = res; 
-        console.log(this.output);
-      }, err => {
-        this.output = err;
-      });
+    this.executor.execute(data);
   }
 }

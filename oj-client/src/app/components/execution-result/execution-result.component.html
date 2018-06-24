@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="card result" *ngIf='output.build'>
+    <div class="card-header">
+      Build
+    </div>
+    <div class="card-body">
+      {{output.build}}
+    </div>
+  </div>
+  <div class="card result" *ngIf='output.err'>
+    <div class="card-header">
+      Error
+    </div>
+    <div class="card-body">
+      {{output.err}}
+    </div>
+  </div>
+  <div class="card result" *ngIf='output.run'>
+    <div class="card-header">
+      Output
+    </div>
+    <div class="card-body">
+      {{output.run}}
+    </div>
+  </div>
+</div>

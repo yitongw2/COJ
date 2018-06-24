@@ -1,124 +1,161 @@
-var redisClient = require('../module/redisClient');
-const TIMEOUT_IN_SECONDS = 3600;
+var redisClient=require('../modules/redisClient');
+const TIMEOUT_IN_SECONDS=3600;
 
 module.exports = function(io) {
-    var sessionPath = '/temp_sessions';
+  // redis session
+  var sessionPath = '/session';
 
-    // collaboration sessions
-    var collaborations = {};
+  // collaboration sessions
+  var collaborations = {};
 
-    // map from socketId to sessionId
-    var socketIdToSessionId = {};
+  // map from socketId to sessionId
+  var socketIdToSessionId = {};
 
-    io.on('connection', (socket) => {
-        let sessionId = socket.handshake.query['sessionId'];
+  // map from socketId to nickname
+  var socketIdToNickname = {};
 
-        socketIdToSessionId[socket.id] = sessionId;
+  io.on('connection', socket => {
+    // session is problem id
+    let sessionId = socket.handshake.query['sessionId'];
+    let nickname = socket.handshake.query['nickname'];
 
-        // if (!(sessionId in collaborations)) {
-        //     collaborations[sessionId] = {
-        //         'participants': []
-        //     };
-        // }
+    // map socket id to session id and nickname
+    socketIdToSessionId[socket.id] = sessionId;
+    socketIdToNickname[socket.id] = nickname;;
 
-        if (sessionId in collaborations) {
-            collaborations[sessionId]['participants'].push(socket.id);
+    if (sessionId in collaborations) {
+      //log
+      console.log('session exists');
 
-            let participants = collaborations[sessionId]['participants'];
-            for (let i = 0; i < participants.length; i++) {
-                io.to(participants[i]).emit("userchange", participants);
-            }
+      // add this user into participants
+      collaborations[sessionId]['participants'].push(socket.id);
+      let participants = collaborations[sessionId]['participants'];
+      // get nicknames
+      let names = participants.map(x => socketIdToNickname[x]);
+
+      // boardcast to all active users
+      for (let i = 0; i < participants.length; i++) {
+        io.to(participants[i]).emit("userchange", names);
+      }
+
+      // log currently active users
+      console.log(collaborations[sessionId]['participants']);
+    } else {
+      // check redis for previous session
+      redisClient.get(sessionPath + '/' + sessionId, data => {
+        if (data) {
+          console.log('session in Redis cache');
+          let buffer = JSON.parse(data);
+          collaborations[sessionId] = {
+            'history': buffer['history'],
+            'lang': buffer['lang'],
+            'participants': [socket.id]
+          };
         } else {
-            // not in memory, check in redis
-            redisClient.get(sessionPath + '/' + sessionId, function(data) {
-                if (data) {
-                    console.log("session terminated previously, get back from redis");
+          console.log("creating new session");
+          collaborations[sessionId] = {
+            'history': [],
+            'lang': 'Java',
+            'participants': [socket.id]
+          }
+        }
+        // send userchange to the only user
+        io.to(socket.id).emit("userchange", [nickname]);
+      });
+    }
 
-                    collaborations[sessionId] = {
-                        'cachedInstructions': JSON.parse(data),
-                        'participants': []
-                    }
-                } else {
-                    console.log("creating new session");
-                    collaborations[sessionId] = {
-                        'cachedInstructions': [],
-                        'participants': []
-                    }
-                }
-                io.to(socket.id).emit("userchange", socket.id);
-            })
+    // restore session from redis
+    socket.on('restoreBuffer', () => {
+      let sessionId = socketIdToSessionId[socket.id];
+      if (sessionId in collaborations) {
+        let history = collaborations[sessionId]['history'];
+        // emit the changes of the history to whoever requested it
+        for (let i = 0; i < history.length; ++i) {
+          socket.emit('change', history[i][0]);
+        }
+        // emit the lang to whoever requested it
+        socket.emit('change-lang', collaborations[sessionId]['lang']);
+      }
+    });
+
+    // disconnect
+    socket.on('disconnect', () => {
+      console.log('user disconnected');
+      let sessionId = socketIdToSessionId[socket.id];
+      if (sessionId in collaborations) {
+        let participants = collaborations[sessionId]['participants'];
+        let index = participants.indexOf(socket.id);
+
+        if (index >= 0) {
+          // delete the socket id from participants
+          participants.splice(index, 1);
+          if (participants.length == 0) {
+            var key = sessionPath + '/' + sessionId;
+            var val = {
+              'history': collaborations[sessionId]['history'],
+              'lang': collaborations[sessionId]['lang']
+            };
+            // store session into redis cache
+            redisClient.set(key,
+              JSON.stringify(val),
+              redisClient.redisPrint);
+            // set expire time
+            redisClient.expire(key, TIMEOUT_IN_SECONDS);
+
+            console.log('clear session in memory');
+            // delete session from collaborations
+            delete collaborations[sessionId];
+            // delete socketId mapping to sessionId
+            delete socketIdToSessionId[socket.id];
+            // delete socketId mapping to Nickname
+            delete socketIdToNickname[socket.id];
+          }
         }
 
-        // socket event listeners
-        socket.on('change', delta => {
-            console.log("change " + socketIdToSessionId[socket.id] + " " + delta);
-            let sessionId = socketIdToSessionId[socket.id];
-            if (sessionId in collaborations) {
-                collaborations[sessionId]['cachedInstructions'].push(["change", delta, Date.now()]);
-            }
+        let names = participants.map(x => socketIdToNickname[x]);
+        // send user changes to all other users
+        for (let i = 0; i < participants.length; i++) {
+          io.to(participants[i]).emit("userchange", names);
+        }
+       // log
+        console.log(socket.id + ' disconnect from [' + participants + ']')
+      }
+    });
 
-            if (sessionId in collaborations) {
-                let participants = collaborations[sessionId]['participants'];
-                for (let i = 0; i < participants.length; i++) {
-                    if (socket.id != participants[i]) {
-                        io.to(participants[i]).emit("change", delta);
-                    }
-                }
-            } else {
-                console.log("could not tie socket id to any collaboration");
-            }
-        });
+    // change
+    socket.on('change', delta => {
+      // log
+      console.log("change " + socketIdToSessionId[socket.id] + " " + delta);
 
-        socket.on('restoreBuffer', () => {
-            let sessionId = socketIdToSessionId[socket.id];
-            console.log("restore buffer for session" + sessionId, "socket id: " + socket.id);
+      let sessionId = socketIdToSessionId[socket.id];
+      // push this change to the history in memory
+      collaborations[sessionId]['history'].push([delta, Date.now()]);
 
-            if (sessionId in collaborations) {
-                let instructions = collaborations[sessionId]['cachedInstructions'];
+      if (sessionId in collaborations) {
+        let participants = collaborations[sessionId]['participants'];
+        // send content changes to all other users
+        for (let i = 0; i < participants.length; i++) {
+          if (socket.id != participants[i]) {
+            io.to(participants[i]).emit("change", delta);
+          }
+        }
+      }
+    });
 
-                for (let i = 0; i < instructions.length; i++) {
-                    socket.emit(instructions[i][0], instructions[i][1]);
-                }
-            } else {
-                console.log("could not find any collcation for the session");
-            }
-        });
-
-        socket.on('disconnect', function() {
-            let sessionId = socketIdToSessionId[socket.id];
-            console.log("disconnect session" + sessionId, "socket id: " + socket.id);
-
-            let foundAndRemoved = false;
-
-            if (sessionId in collaborations) {
-                let participants = collaborations[sessionId]['participants'];
-
-                let index = participants.indexOf(socket.id);
-
-                if (index >= 0) {
-                    participants.splice(index, 1);
-                    foundAndRemoved = true;
-
-                    if (participants.length == 0) {
-                        console.log("last participant in collaboration, committing to redis and remove from memory");
-                        let key = sessionPath + "/" + sessionId;
-                        let value = JSON.stringify(collaborations[sessionId]['cachedInstructions']);
-
-                        redisClient.set(key, value, redisClient.redisPrint);
-
-                        redisClient.expire(key, TIMEOUT_IN_SECONDS);
-
-                        delete collaborations[sessionId];
-                    }
-                }
-                for (let i = 0; i < participants.length; i++) {
-                    io.to(participants[i]).emit("userchange", participants);
-                }
-            }
-
-            if(!foundAndRemoved) {
-                console.log("warning: could not find the socket.id in collaboration");
-            }
-        })
-    })
+    // chang language
+    socket.on('change-lang', lang => {
+      console.log('change lang to ' + lang);
+      let sessionId = socketIdToSessionId[socket.id];
+      if (sessionId in collaborations) {
+        collaborations[sessionId]['lang'] = lang;
+        let participants = collaborations[sessionId]['participants'];
+        // send lang change to all participants
+        for (let i = 0; i < participants.length; i++) {
+          if (socket.id != participants[i]) {
+            io.to(participants[i]).emit("change-lang", lang);
+          }
+        }
+      }
+    });
+  });
 }

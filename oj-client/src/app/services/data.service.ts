@@ -1,57 +1,40 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
-import { Observable } from 'rxjs/Rx';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
 import { Problem } from '../models/problem.model';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class DataService {
-  //problems: Problem[] = PROBLEMS;
-  private _problemSource = new BehaviorSubject<Problem[]>([]);
+
+  server_url: string = 'api/v1';
+  private _problemSource = new BehaviorSubject<Problem[]>([]);  
 
   constructor(private httpClient: HttpClient) { }
 
   getProblems(): Observable<Problem[]> {
-    this.httpClient.get('api/v1/problems')
-      .toPromise()
-      .then((res: any) => {
-        this._problemSource.next(res);
-      })
-      .catch(this.handleError);
-
-      return this._problemSource.asObservable();
-  }
+    this.httpClient.get(this.server_url + '/problems')
+      .subscribe((problems: Problem[]) => {
+        this._problemSource.next(problems)
+      });
+    return this._problemSource.asObservable();
+  }  
 
   getProblem(id: number): Promise<Problem> {
-    //return this.problems.find( (problem) => problem.id === id );
-    return this.httpClient.get(`api/v1/problems/${id}`)
+    return this.httpClient.get(this.server_url + `/problems/${id}`)
       .toPromise()
       .then((res: any) => res)
       .catch(this.handleError);
   }
 
   addProblem(problem: Problem) {
-    // problem.id = this.problems.length + 1;
-    // this.problems.push(problem);
-    const options = { headers: new HttpHeaders({ 'Content-Type': 'application/json'})};
-    return this.httpClient.post('api/v1/problems', problem, options)
+    const options = { headers: new HttpHeaders({'Content-Type': 'application/json'})};
+    return this.httpClient.post(this.server_url + '/problems', problem, options)
       .toPromise()
       .then((res: any) => {
         this.getProblems();
-        return res;
-      })
-      .catch(this.handleError);    
-  }
-
-  buildAndRun(data) : Promise<any> {
-    const options = {headers: new HttpHeaders({'Content-Type': 'application/json'})};
-
-    return this.httpClient.post('api/v1/build_and_run', data, options)
-      .toPromise()
-      .then(res => {
-        console.log("build and run: " + res);
-        return res;
       })
       .catch(this.handleError);
   }
@@ -60,4 +43,3 @@ export class DataService {
     return Promise.reject(error.body || error);
   }
 }
-

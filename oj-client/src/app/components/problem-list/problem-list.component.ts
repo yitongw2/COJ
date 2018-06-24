@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
 import { Problem } from '../../models/problem.model';
 import { DataService } from '../../services/data.service';
 import { InputService } from '../../services/input.service';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-problem-list',
@@ -10,33 +10,27 @@ import { InputService } from '../../services/input.service';
   styleUrls: ['./problem-list.component.css']
 })
 export class ProblemListComponent implements OnInit {
+
   problems: Problem[];
-  subscriptionProblems: Subscription;
+  searchTerm: String;
+  searchTermSubscription: Subscription;
+  problemsSubscription: Subscription;
 
-  searchTerm: string = '';
-  subscriptionInput: Subscription;
-
-  constructor(private dataService: DataService,
+  constructor(private dataService: DataService, 
               private inputService: InputService) { }
 
   ngOnInit() {
     this.getProblems();
-    this.getSearchTerm();
+    this.searchTermSubscription = this.inputService.getSearchTerm()
+	.subscribe(term => this.searchTerm = term);
   }
+ 
+  getProblems() {
+    this.problemsSubscription = this.dataService.getProblems()
+      .subscribe(problems => this.problems = problems);
+  } 
 
   ngOnDestroy() {
-    this.subscriptionProblems.unsubscribe();
+    this.searchTermSubscription.unsubscribe();
   }
-
-  getProblems() {
-    this.subscriptionProblems = this.dataService.getProblems()
-      .subscribe(problems => this.problems = problems);
-  }
-
-  getSearchTerm(): void {
-    this.subscriptionInput = this.inputService.getInput()
-                                .subscribe(
-                                  inputTerm => this.searchTerm = inputTerm
-                                );
-  }
-}
+};

@@ -5,11 +5,13 @@ Three major components:
 
 - oj-client : Angular2-based front end with bootstrap
 - oj-server : node.js backend platform with express middleware
-- executor: Flask server with Docker Engine API
+- executor-server: Flask server with Docker Engine API
+
+The project is accompanied with complete dockerization for the benefit of deployment. Make sure to set up docker before running this app on your machine.
 
 COJ also provides [RESTful APIs](https://github.com/yitongw2/COJ/blob/master/README.md#restful-api-documentation) for obtaining, fetching and searching coding problems as well as executing user-submitted code. 
 
-Tech Stack = {Angular2, Node.js, Express, MongoDB, Redis, Javascript, Python, Nginx, Socket.io}
+Tech Stack = {Angular, Node.js, Express, MongoDB, Redis, Javascript, Python, Nginx, Socket.io, Docker}
 
 ## Getting Started
 
@@ -26,59 +28,40 @@ or
 git clone git@github.com:yitongw2/COJ.git
 ```
 
+### Dockerization
+
+To fully use the power of docker, I have dockerized the whole COJ application with multiple containers. A snippet of how the application is composed using docker-compose is shown below:
+
+```
+version: '3'
+services:
+  coj:
+    build: .
+    links:
+        - redis
+        - executor-server
+    ports:
+        - "3000:3000"
+  executor-server:
+    build: ./executor-server
+    # mount the docker socket to the container so that they will share the same docker deamon
+    volumes:
+        # mount docker socket so that the container that executes user code share the same docker deamon
+        - /var/run/docker.sock:/var/run/docker.sock
+        # mount tmp folder where the user code will be stored so that the inner container will have access to it
+        - /tmp:/tmp
+    ports:
+        - "5000:5000"
+  redis:
+    image: "redis"
+```
+
 ### Prerequisites
 
 Things you need to install the software and how to install them are listed below. However, these instructions are only for **Linux Ubuntu 16.04**.
 
-**Install Node.js**
-```
-sudo apt-get update
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
+Since it is fully dockerized, installing all the necessary libraries and tools are extremely easy with docker-compose build.
 
-**Install npm**
-```
-sudo apt-get install npm
-```
-
-**Install nodemon**
-```
-sudo apt-get install nodemon
-```
-**Install git**
-```
-sudo apt-get install git
-```
-**Install angular/cli**
-```
-sudo npm install -g @angular/cli@latest
-```
-**Install Redis (version 3.2.6)**
-```
-wget http://download.redis.io/releases/redis-3.2.6.tar.gz
-tar xzf redis-3.2.6.tar.gz
-cd redis-3.2.6
-make
-sudo make install
-cd utils
-sudo ./install_server.sh
-```
-
-**Install Python3 (should be already installed in ubuntu)**
-```
-sudo apt-get install python3.6
-```
-**Install pip3 for python3**
-pip is the package management tool used for python packages
-```
-sudo apt-get update
-sudo apt-get -y install python3-pip
-```
-**Install Flask**
-```
-sudo pip3 install Flask
-```
 **Install Docker**
 ```
 curl -fsSL https://get.docker.com/ | sh
@@ -158,66 +141,14 @@ upstream backend {
 ```
 The list of servers is the backend servers that nginx will redistribute client requests to. 
 ### Installing
-Running the application on a local machine is simple. There is bash script named init.sh in the root folder which will initialize whatever the project needs. 
-
-Simply run the bash script init.sh
-```
-./init.sh
-```
-
-An example of running init.sh
-
-![example-running-init](https://user-images.githubusercontent.com/13974845/36451005-774243dc-1644-11e8-99ec-bfb59b37e2d9.png)
-
-**Alternatively, you can run different components separately**
-
----
-*Build oj-client*
+Running the application on a local machine is simple. Since the application is already dockerized with docker-compose.yml, just build and run it with docker-compose.
 
 ```
-cd oj-client
-ng build
-```
-This will build the whole front end into a folder named public at root level
-
-if you are developing new features in the front end and want to monitor real-time changes, use watch option
-```
-ng build --watch
+docker-compose build
+docker-compose up
 ```
 
----
 
-*Fire up oj-server*
-
-first, go to oj-server directory
-```
-cd oj-server
-```
-use npm 
-```
-npm start
-```
-or use nodemon for development
-```
-nodemon server.js
-```
-
----
-
-*Fire up executor*
-
-first, go to executor directory
-```
-cd executor
-```
-build docker image from Dockerfile
-```
-docker build -< Dockerfile
-```
-run flask app
-```
-python3 executor_server.py
-```
 ## RESTful API documentation
 
 ---
@@ -390,7 +321,8 @@ To set up Nginx in order to work like that, simply add another server configurat
 
 ## Built With
 
-* [Angular2]()
+* [Angular]()
+* [Docker]()
 * [Node.js]()
 * [Express]()
 * [MongoDB]()

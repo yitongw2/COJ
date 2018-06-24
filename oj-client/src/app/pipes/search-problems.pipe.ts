@@ -1,18 +1,23 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Problem } from '../models/problem.model';
 
-@Pipe({name: 'searchProblems'})
+// The @Pipe decorator allows you to define the pipe name that you'll use within template expressions. It must be a valid JavaScript identifier. Your pipe's name is exponentialStrength.
+@Pipe({
+  name: 'searchProblems'
+})
 export class SearchProblemsPipe implements PipeTransform {
-  transform(value: Problem[], by: string): Problem[] {
-    if (!by) {
+
+  transform(value: Problem[], term: string): Problem[] {
+    if (!term) {
       return value;
     }
-    let result = value.filter(problem => problem.id === +by);
+    let result = value.filter(problem => problem.id === +term);
     if (!result || result.length == 0) {
-      result = value.filter(problem => problem.name.includes(by));
-      let tmp = value.filter(problem => problem.desc.includes(by) && !result.includes(problem));
+      result = value.filter(problem => problem.name.includes(term.toLowerCase()));
+      let tmp = value.filter(problem => problem.desc.includes(term.toLowerCase()) && !result.includes(problem));
       result = result.concat(tmp);
     }
     return result;
   }
+
 }

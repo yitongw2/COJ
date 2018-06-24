@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject } from 'rxjs/BehaviorSubject';
-import {Observable} from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class InputService {
-  private inputSubject$ = new BehaviorSubject<string>('');
 
-
+  private searchTerm: BehaviorSubject<String> = new BehaviorSubject<String>('');
+   
   constructor() { }
-
-  changeInput(term) {
-    this.inputSubject$.next(term);
+  
+  setSearchTerm(term: String) {
+    this.searchTerm.next(term);
   }
-
-  getInput(): Observable<string> {
-    return this.inputSubject$.asObservable();
+  
+  getSearchTerm(): Observable<String> {
+    return this.searchTerm.asObservable();
   }
-
 }

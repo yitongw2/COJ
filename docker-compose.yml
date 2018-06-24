@@ -1,0 +1,21 @@
+version: '3'
+services:
+  coj:
+    build: .
+    links:
+        - redis
+        - executor-server
+    ports:
+        - "3000:3000"
+  executor-server:
+    build: ./executor-server
+    # mount the docker socket to the container so that they will share the same docker deamon
+    volumes:
+        # mount docker socket so that the container that executes user code share the same docker deamon
+        - /var/run/docker.sock:/var/run/docker.sock
+        # mount tmp folder where the user code will be stored so that the inner container will have access to it
+        - /tmp:/tmp
+    ports:
+        - "5000:5000"
+  redis:
+    image: "redis"

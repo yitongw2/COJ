@@ -1,35 +1,43 @@
-<div>
-    <form #formRef = "ngForm">
+<div class="modal-header">
+  <h4 class="modal-title" id="myModalLabel">New Problem</h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="resetSubmit()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+  <div class="new_problem">
+    <form #formRef="ngForm" [formGroup]="newProblemForm">
       <div class="form-group">
-        <label for="problemName">Problem name</label>
-        <input name = "problemName" id="problemName" class="form-control"
-          type="text" required placeholder="Please enter problem name" 
-          [(ngModel)] = "newProblem.name">
+        <label for="problemName">Problem Name</label>
+        <input type="text" class="form-control" id="problemName" formControlName="problemName" name="problemName" placeholder="Input problem name" required>
       </div>
       <div class="form-group">
-        <label for="problemDesc">problem description</label>
-        <textarea name = "problemDesc" id="problemDesc" class="form-control"
-         placeholder="Please enter problem description" 
-          [(ngModel)] = "newProblem.desc" rows="3">
-        </textarea>
+        <label for="problemDesc">Problem Description</label> 
+        <textarea type="text" class="form-control" id="problemDesc" formControlName="problemDesc"  name="problemDesc" placeholder="Input description" required rows="3"></textarea>
       </div>
-      <div class="form-group">
-         <label for="problemDifficulty">Difficulty</label> 
-         <select class="form-control" id="difficulty" name="difficulty"
-         [(ngModel)] = "newProblem.difficulty">
-          <option *ngFor = "let difficulty of difficulties" [value] = "difficulty">
-            {{difficulty}}
-          </option>
-         </select>
-      </div>
-      <div class="row">
-        <div class = "col-md-12">
-          <button type="submit" class="btn btn-primary pull-right"
-            (click) = "addProblem()"
-          > Add problem </button>
+        <div class="form-group">
+          <label for="difficulty">Difficulty</label>
+          <select class="form-control" id="difficulty" formControlName="difficulty" name="difficulty">
+            <option *ngFor="let difficulty of difficulties" [value]="difficulty">
+            {{ difficulty }}
+            </option>
+          </select>
         </div>
-      </div>
     </form>
   </div>
-  <br/>
-  <br/>
+</div>
+
+<div class="modal-footer">
+  <div *ngIf='submitted && success' class="alert alert-success" role="alert">
+    <strong>Well done!</strong> You successfully add a new problem. Close the window if you are done.
+  </div>
+  <div *ngIf='submitted && !success' class="alert alert-danger" role="alert">
+     <strong>Oh snap!</strong> This problem has already existed.
+  </div>
+  <div *ngIf='!submitted' class="alert alert-info" role="alert">
+    <strong>Heads up!</strong> Name and description must not be empty.
+  </div>
+  <button type="button" class="btn btn-danger modal_btn" data-dismiss="modal" (click)="resetSubmit()">Cancel</button>
+  <button type="submit" class="btn btn-primary modal_btn" data-dismiss="modal" (click)="addProblem()" [disabled]="newProblemForm.invalid">Add</button>
+</div>
