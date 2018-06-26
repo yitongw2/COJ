@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Problem } from '../models/problem.model';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,9 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 export class DataService {
 
   server_url: string = 'api/v1';
-  private _problemSource = new BehaviorSubject<Problem[]>([]);  
+  private _problemSource = new BehaviorSubject<Problem[]>([]);
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient,
+              private authService: AuthService) { }
 
   getProblems(): Observable<Problem[]> {
     this.httpClient.get(this.server_url + '/problems')
@@ -20,7 +21,7 @@ export class DataService {
         this._problemSource.next(problems)
       });
     return this._problemSource.asObservable();
-  }  
+  }
 
   getProblem(id: number): Promise<Problem> {
     return this.httpClient.get(this.server_url + `/problems/${id}`)
@@ -30,7 +31,12 @@ export class DataService {
   }
 
   addProblem(problem: Problem) {
-    const options = { headers: new HttpHeaders({'Content-Type': 'application/json'})};
+    const options = { headers: new HttpHeaders(
+      {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.authService.accessToken}`
+      }
+    )};
     return this.httpClient.post(this.server_url + '/problems', problem, options)
       .toPromise()
       .then((res: any) => {

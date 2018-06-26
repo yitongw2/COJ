@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json()
 
 const problemService = require('../services/problemService');
-const authService= require('../services/authService');
+const authService = require('../services/authService');
 
 router.get('/access-token', (req, res) => {
   authService.getAccessToken();
@@ -27,7 +27,7 @@ router.get('/problems/:id', (req, res) => {
     });
 });
 
-router.post('/problems', jsonParser, (req, res) => {
+router.post('/problems', authService.authCheck, jsonParser, (req, res) => {
   problemService.addProblem(req.body)
     .then(problem => {
       res.json(problem);

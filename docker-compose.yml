@@ -1,5 +1,11 @@
 version: '3'
 services:
+  nginx:
+    build: ./nginx
+    links:
+        - coj
+    ports:
+        - "80:80"
   coj:
     build: .
     links:

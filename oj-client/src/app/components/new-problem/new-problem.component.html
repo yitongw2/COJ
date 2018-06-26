@@ -13,7 +13,7 @@
         <input type="text" class="form-control" id="problemName" formControlName="problemName" name="problemName" placeholder="Input problem name" required>
       </div>
       <div class="form-group">
-        <label for="problemDesc">Problem Description</label> 
+        <label for="problemDesc">Problem Description</label>
         <textarea type="text" class="form-control" id="problemDesc" formControlName="problemDesc"  name="problemDesc" placeholder="Input description" required rows="3"></textarea>
       </div>
         <div class="form-group">
@@ -29,13 +29,16 @@
 </div>
 
 <div class="modal-footer">
-  <div *ngIf='submitted && success' class="alert alert-success" role="alert">
+  <div *ngIf='submitted && success && authService.isLoggedIn' class="alert alert-success" role="alert">
     <strong>Well done!</strong> You successfully add a new problem. Close the window if you are done.
   </div>
-  <div *ngIf='submitted && !success' class="alert alert-danger" role="alert">
+  <div *ngIf='!authService.isLoggedIn' class="alert alert-danger" role="alert">
+     <strong>Wait!</strong> You have not logged in yet
+  </div>
+  <div *ngIf='submitted && !success && authService.isLoggedIn' class="alert alert-danger" role="alert">
      <strong>Oh snap!</strong> This problem has already existed.
   </div>
-  <div *ngIf='!submitted' class="alert alert-info" role="alert">
+  <div *ngIf='!submitted && authService.isLoggedIn' class="alert alert-info" role="alert">
     <strong>Heads up!</strong> Name and description must not be empty.
   </div>
   <button type="button" class="btn btn-danger modal_btn" data-dismiss="modal" (click)="resetSubmit()">Cancel</button>

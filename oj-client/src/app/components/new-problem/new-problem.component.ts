@@ -1,16 +1,8 @@
-import { Component, OnInit } from '@angular/core'; 
+import { Component, OnInit } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { Problem } from '../../models/problem.model';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-
-/*
-const DEFAULT_PROBLEM: Problem = Object.freeze({ 
-  id: 0,
-  name: '',
-  desc: '',
-  difficulty: 'easy'
-});
-*/
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-new-problem',
@@ -18,14 +10,15 @@ const DEFAULT_PROBLEM: Problem = Object.freeze({
   styleUrls: ['./new-problem.component.css']
 })
 export class NewProblemComponent implements OnInit {
- 
-  success: boolean = false; 
+
+  success: boolean = false;
   submitted: boolean = false;
   newProblemForm: FormGroup;
-  //newProblem: Problem = Object.assign({}, DEFAULT_PROBLEM); 
+  //newProblem: Problem = Object.assign({}, DEFAULT_PROBLEM);
   difficulties: string[] = ['easy', 'medium', 'hard', 'super'];
-  
-  constructor(private dataService: DataService) { }
+
+  constructor(private dataService: DataService,
+              public authService: AuthService) { }
 
   ngOnInit() {
     this.createForm();
@@ -48,7 +41,7 @@ export class NewProblemComponent implements OnInit {
       });
     this.resetProblem();
   }
-  
+
   resetProblem() {
     this.newProblemForm.get('problemName').setValue('');
     this.newProblemForm.get('problemDesc').setValue('');
