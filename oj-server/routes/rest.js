@@ -47,4 +47,15 @@ router.put('/problems', authService.authCheck, jsonParser, (req, res) => {
     });
 });
 
+router.delete('/problems/:id', authService.authCheck, (req, res) => {
+  const id = req.params.id;
+  problemService.deleteProblem(+id)
+    .then(problem => {
+      res.json(problem);
+    },
+    error => {
+      res.status(500).send('Can not delete this problem');
+    });
+});
+
 module.exports = router;

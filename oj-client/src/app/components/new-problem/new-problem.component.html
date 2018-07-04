@@ -11,10 +11,16 @@
       <div class="form-group">
         <label for="problemName">Problem Name</label>
         <input type="text" class="form-control" id="problemName" formControlName="problemName" name="problemName" placeholder="Input problem name" required>
+        <div *ngIf='problemName.invalid' class="alert alert-danger problem-form-error">
+          Problem name must not be empty
+        </div>
       </div>
       <div class="form-group">
         <label for="problemDesc">Problem Description</label>
-        <textarea type="text" class="form-control" id="problemDesc" formControlName="problemDesc"  name="problemDesc" placeholder="Input description" required rows="3"></textarea>
+        <textarea type="text" class="form-control" id="problemDesc" formControlName="problemDesc"  name="problemDesc" placeholder="Input problem description" required rows="3"></textarea>
+        <div *ngIf='problemDesc.invalid' class="alert alert-danger problem-form-error">
+          Problem description must not be empty
+        </div>
       </div>
         <div class="form-group">
           <label for="difficulty">Difficulty</label>
@@ -28,19 +34,33 @@
   </div>
 </div>
 
-<div class="modal-footer">
-  <div *ngIf='submitted && success && authService.isLoggedIn' class="alert alert-success" role="alert">
-    <strong>Well done!</strong> You successfully add a new problem. Close the window if you are done.
-  </div>
+<div class="status">
   <div *ngIf='!authService.isLoggedIn' class="alert alert-danger" role="alert">
-     <strong>Wait!</strong> You have not logged in yet
+    <h4 class="alert-heading">Wait!</h4>
+    <p>
+      You have not logged in yet
+    </p>
   </div>
-  <div *ngIf='submitted && !success && authService.isLoggedIn' class="alert alert-danger" role="alert">
-     <strong>Oh snap!</strong> This problem has already existed.
+  <div *ngIf="status == STATUS.Pending && authService.isLoggedIn" class="progress">
+    <div class="progress-bar progress-bar-striped active pending-progress-bar">
+        Loading, please wait...
+    </div>
   </div>
-  <div *ngIf='!submitted && authService.isLoggedIn' class="alert alert-info" role="alert">
-    <strong>Heads up!</strong> Name and description must not be empty.
+  <div *ngIf='status == STATUS.Success' class="alert alert-success" role="alert">
+    <h4 class="alert-heading">Well done!</h4>
+    <p>
+      You successfully add a new problem. Close the window if you are done.
+    </p>
   </div>
-  <button type="button" class="btn btn-danger modal_btn" data-dismiss="modal" (click)="resetSubmit()">Cancel</button>
-  <button type="submit" class="btn btn-primary modal_btn" data-dismiss="modal" (click)="addProblem()" [disabled]="newProblemForm.invalid">Add</button>
+  <div *ngIf='status == STATUS.Fail' class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">Oh snap!</h4>
+    <p>
+      This problem has already existed.
+    </p>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary modal_btn" data-dismiss="modal" (click)="resetSubmit()">Close</button>
+  <button type="submit" class="btn btn-primary modal_btn" (click)="addProblem()" [disabled]="newProblemForm.invalid || !authService.isLoggedIn">Save</button>
 </div>

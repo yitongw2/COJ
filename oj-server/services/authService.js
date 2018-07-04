@@ -2,6 +2,7 @@
 const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
 const request = require('request');
+const config = require('../config/auth0-config.json');
 
 // We are going to implement a JWT middleware that will ensure the validity of our token. We'll require each protected route to have a valid access_token sent in the Authorization header
 const authCheck = jwt({
@@ -9,22 +10,22 @@ const authCheck = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: "https://yitongw2.auth0.com/.well-known/jwks.json"
+    jwksUri: config.JWKSURI
   }),
-  audience: process.env.AUDIENCE,
-  issuer: "https://yitongw2.auth0.com/",
+  audience: config.AUDIENCE,
+  issuer: config.DOMAIN,
   algorithms: ['RS256']
 });
 
 const getAccessToken = function() {
   var options = { method: 'POST',
-    url: 'https://yitongw2.auth0.com/oauth/token',
+    url: config.TOKEN_URL,
     headers: { 'content-type': 'application/json' },
     body: {
       grant_type: 'client_credentials',
       client_id: 't-h5ghIxq-uUnGPMXmWIjgVPVDe5xgKN',
-      client_secret: process.env.APP_SECRET,
-      audience: 'http://localhost:3000'
+      client_secret: config.APP_SECRET,
+      audience: config.AUDIENCE
     },
     json: true
   };

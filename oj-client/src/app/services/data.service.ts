@@ -45,6 +45,18 @@ export class DataService {
       .catch(this.handleError);
   }
 
+  deleteProblem(id: number):Promise<Problem> {
+    const options = { headers: new HttpHeaders(
+      {
+      'Authorization': `Bearer ${this.authService.accessToken}`
+      }
+    )};
+    return this.httpClient.delete(this.server_url + `/problems/${id}`, options)
+      .toPromise()
+      .then((res: any) => res)
+      .catch(this.handleError);
+  }
+
   private handleError(error: any): Promise<any> {
     return Promise.reject(error.body || error);
   }

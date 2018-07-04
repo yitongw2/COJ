@@ -13,15 +13,16 @@
         <a href="#" class="col-md-1" data-toggle="modal" data-target="#newProblem"><i class="fas fa-plus-square add-icon"></i></a>
       </div>
     </div>
-    <a class="list-group-item" *ngFor="let problem of (problems | searchProblems: searchTerm)" [routerLink]="['/problems', problem.id]">
+    <div class="list-group-item" *ngFor="let problem of (problems | searchProblems: searchTerm)">
       <div class="row">
         <span class="{{'col-md-2 pull-left badge difficulty diff-' + problem.difficulty.toLowerCase()}}">
-          {{problem.difficulty}}
+          {{ problem.difficulty }}
         </span>
-        <strong class="col-md-2">{{problem.id}}.</strong>
-        <strong class="col-md-8 title">{{problem.name}}</strong>
+        <strong class="col-md-2">{{ problem.id }}.</strong>
+        <a class="col-md-7 title" [routerLink]="['/problems', problem.id]">{{ problem.name }}</a>
+        <a *ngIf="authService.isLoggedIn" class="btn col-md-1" (click)='deleteProblem(problem.id)'><i class="fas fa-minus-circle delete-icon"></i></a>
       </div>
-    </a>
+    </div>
   </div>
 </div>
 

@@ -79,7 +79,7 @@ export class AuthService {
     // Ensure that returnTo URL is specified in Auth0
     // Application settings for Allowed Logout URLs
     this.auth0.logout({
-      returnTo: 'http://localhost:3000',
+      returnTo: environment.auth.returnTo,
       clientID: environment.auth.clientID
     });
   }

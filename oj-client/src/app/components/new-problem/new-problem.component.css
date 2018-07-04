@@ -5,3 +5,15 @@
 .modal_btn {
   width: 80px;
 }
+
+.problem-form-error {
+  margin-top: 5px;
+}
+
+.status {
+  margin: 15px;
+}
+
+.pending-progress-bar {
+  width: 100%;
+}

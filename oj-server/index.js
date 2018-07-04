@@ -1,6 +1,3 @@
-// load environment var
-require('dotenv').config()
-
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -12,7 +9,8 @@ const io = socketIO();
 const editorSocketService = require('./services/editorSocketService')(io);
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://user:user@ds121268.mlab.com:21268/coj-db',
+const db_config = require('./config/mongodb-config.json');
+mongoose.connect(`mongodb://${db_config.DBUser}:${db_config.DBPassword}@${db_config.DBHost}:${db_config.DBPort}/${db_config.DBName}`,
   err => {
     if (err) {
       console.log('DB connection failed');

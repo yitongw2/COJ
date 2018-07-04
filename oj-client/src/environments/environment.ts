@@ -7,9 +7,10 @@ export const environment = {
   auth: {
     clientID: 'Xycym8Cl73g7O20pFiDwG1uHPTu9tXGl',
     domain: 'yitongw2.auth0.com', // e.g., you.auth0.com
-    audience: 'http://localhost:3000', // e.g., http://localhost:3001
-    redirect: 'http://localhost:3000/callback',
-    scope: 'openid profile email'
+    audience: 'http://localhost:3000', // e.g., default cant be changed unless create a new api
+    redirect: 'http://localhost/callback',
+    scope: 'openid profile email',
+    returnTo: 'http://localhost',
   }
 };
 

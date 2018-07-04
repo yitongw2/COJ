@@ -26,6 +26,11 @@
   font-size: 1.5em;
 }
 
+.delete-icon {
+  color: red;
+  font-size: 1.5em;
+}
+
 .problems_container {
   margin-top: 20px;
   margin-bottom: 20px;

@@ -1,7 +1,7 @@
 const ProblemModel = require('../models/problemModel');
 
 const getProblems = function() {
-  // since we will store problems in database later // we need promise to handle asynchronous call 
+  // since we will store problems in database later // we need promise to handle asynchronous call
   return new Promise((res, rej) => {
     ProblemModel.find({}, (err, data) => {
       if (err) {
@@ -38,7 +38,7 @@ const addProblem = function(newProblem){
           res(problem);
         });
       }
-    });     
+    });
   });
 }
 
@@ -56,9 +56,22 @@ const changeProblem = function(newProblem) {
   });
 }
 
+const deleteProblem = function(id) {
+  return new Promise((res, rej) => {
+    ProblemModel.findOneAndDelete({id: id}, (err, data) => {
+      if (err) {
+        rej(err);
+      } else {
+        res(data);
+      }
+    });
+  });
+}
+
 module.exports = {
   getProblems: getProblems,
   getProblem: getProblem,
   addProblem: addProblem,
-  changeProblem: changeProblem
+  changeProblem: changeProblem,
+  deleteProblem: deleteProblem
 };

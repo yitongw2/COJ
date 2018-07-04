@@ -4,6 +4,13 @@ import { Problem } from '../../models/problem.model';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
+enum Status {
+  Idle,
+  Pending,
+  Success,
+  Fail,
+}
+
 @Component({
   selector: 'app-new-problem',
   templateUrl: './new-problem.component.html',
@@ -11,10 +18,9 @@ import { AuthService } from '../../services/auth.service';
 })
 export class NewProblemComponent implements OnInit {
 
-  success: boolean = false;
-  submitted: boolean = false;
+  STATUS = Status;
+  status = Status.Idle;
   newProblemForm: FormGroup;
-  //newProblem: Problem = Object.assign({}, DEFAULT_PROBLEM);
   difficulties: string[] = ['easy', 'medium', 'hard', 'super'];
 
   constructor(private dataService: DataService,
@@ -25,7 +31,7 @@ export class NewProblemComponent implements OnInit {
   }
 
   addProblem() {
-    this.submitted = true;
+    this.status = Status.Pending;
     let newProblem = {
       'id': 0,
       'name': this.newProblemForm.get('problemName').value,
@@ -34,12 +40,24 @@ export class NewProblemComponent implements OnInit {
     };
     this.dataService.addProblem(newProblem)
       .then(res => {
-        this.success = true;
+        this.status = Status.Success;
+        this.resetProblem();
       },
       err => {
-        this.success = false;
+        this.status = Status.Fail;
       });
-    this.resetProblem();
+  }
+
+  get problemName() {
+    return this.newProblemForm.get('problemName');
+  }
+
+  get problemDesc() {
+    return this.newProblemForm.get('problemDesc');
+  }
+
+  get difficulty() {
+    return this.newProblemForm.get('difficulty');
   }
 
   resetProblem() {
@@ -49,16 +67,15 @@ export class NewProblemComponent implements OnInit {
   }
 
   resetSubmit() {
-    this.success = false;
-    this.submitted = false;
+    this.status = Status.Idle;
     this.resetProblem();
   }
 
   private createForm() {
     this.newProblemForm = new FormGroup({
-      problemName: new FormControl('', Validators.required),
-      problemDesc: new FormControl('', Validators.required),
-      difficulty: new FormControl('easy')
+      'problemName': new FormControl('', Validators.required),
+      'problemDesc': new FormControl('', Validators.required),
+      'difficulty': new FormControl('easy')
     });
   }
 }

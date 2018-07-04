@@ -1,0 +1,7 @@
+{
+    "DBHost" : "ds121268.mlab.com",
+    "DBPort" : "21268",
+    "DBName" : "coj-db",
+    "DBUser" : "user",
+    "DBPassword" : "user"
+}
