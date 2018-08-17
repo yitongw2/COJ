@@ -12,7 +12,7 @@ services:
         - redis
         - executor-server
     ports:
-        - "3000:3000"
+        - "127.0.0.1:3000:3000"
   executor-server:
     build: ./executor-server
     # mount the docker socket to the container so that they will share the same docker deamon
@@ -22,6 +22,6 @@ services:
         # mount tmp folder where the user code will be stored so that the inner container will have access to it
         - /tmp:/tmp
     ports:
-        - "5000:5000"
+        - "127.0.0.1:5000:5000"
   redis:
     image: "redis"
