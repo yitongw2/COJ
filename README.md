@@ -58,8 +58,6 @@ services:
 
 ### Prerequisites
 
-Things you need to install the software and how to install them are listed below. However, these instructions are only for **Linux Ubuntu 16.04**.
-
 Since it is fully dockerized, installing all the necessary libraries and tools are extremely easy with docker-compose build.
 
 **Install Docker**
@@ -73,73 +71,7 @@ sudo usermod -aG docker $(whoami)
 #To start docker when the system boots
 sudo systemctl enable docker
 ```
-**Install Nginx**
 
-Nginx is used for reversed proxy that redirects request sent to port 80 to port 3000, where oj-server will be listening
-
-_For ubuntu 16.04:_
-Add following two lines into /etc/apt/sources.list
-```
-deb http://nginx.org/packages/ubuntu/ xenial nginx
-deb-src http://nginx.org/packages/ubuntu/ xenial nginx
-```
-Then run:
-```
-sudo apt-get update
-sudo apt-get install nginx
-```
-**Set up Nginx - reversed proxy**
-
-Make directories for our configuration files
-```
-cd /etc/nginx
-mkdir sites-available
-mkdir sites-enabled
-cd sites-enabled
-```
-In directory 'sites-enabled', create a file named 'custom.conf' and copy the following content into the file
-```
-server {
-  listen 80;
-  server_name coj;
-  location / {
-    proxy_set_header  X-Real-IP  $remote_addr;
-    proxy_set_header  Host       $http_host;
-    proxy_pass        http://127.0.0.1:3000;
-  }
-}
-```
-Then, link the config file in sites enabled (this will make it seem like the file is actually copied insites-enabled)
-```
-sudo ln -s /etc/nginx/sites-available/custom /etc/nginx/sites-enabled/custom
-```
-Finally, change the nginx configuration file (location: /etc/nginx/nginx.conf) to use your custom configuration
-```
-cd /etc/nginx
-# or use any editor you prefer (emac, nano)
-sudo vim nginx.conf
-```
-In nginx.conf, change the line 
-```
-'include /etc/nginx/conf.d/\*;' 
-```
-to 
-```
-'include /etc/nginx/sites-enabled/\*;'
-```
-**Set up Nginx - load balancer**
-
-Optionally, you can set up a load balancer which distributes client requests among several backend servers on different ips. 
-
-add the following content to your custom configuration file
-```
-upstream backend {
-   server backend.example.com;
-   server XXXX.XXXX.XXXX.XXXX;
-   ...
-}
-```
-The list of servers is the backend servers that nginx will redistribute client requests to. 
 ### Installing
 Running the application on a local machine is simple. Since the application is already dockerized with docker-compose.yml, just build and run it with docker-compose.
 
